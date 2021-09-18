@@ -4,7 +4,10 @@ const app = express();
 
 app.get("/", function (req, res) {
   (async () => {
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
     const page = await browser.newPage();
     await page.setUserAgent("Chrome/93.0.4577.0");
     await page.goto("https://steamstat.us", { waitUntil: "domcontentloaded" });
