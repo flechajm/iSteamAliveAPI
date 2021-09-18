@@ -5,12 +5,16 @@
   "main": "app.js",
   "gitRepo": "https://github.com/flechajm/ISteamAliveAPI",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
   },
   "author": "Juan Manuel Flecha",
   "license": "MIT",
   "dependencies": {
     "express": "^4.17.1",
     "puppeteer": "^10.2.0"
+  },
+  "engines": {
+    "node": "14.x"
   }
 }

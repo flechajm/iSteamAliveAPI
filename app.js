@@ -2,7 +2,7 @@ const express = require("express");
 const puppeteer = require("puppeteer");
 const app = express();
 
-app.get("/api/steamstatus", function (req, res) {
+app.get("/", function (req, res) {
   (async () => {
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
