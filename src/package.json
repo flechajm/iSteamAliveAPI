@@ -1,0 +1,15 @@
+{
+  "name": "isteamaliveapi",
+  "version": "1.0.0",
+  "description": "\"Is Steam Alive API\" checks the current status of the Steam Services by scraping https://steamstat.us",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Juan Manuel Flecha",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "puppeteer": "^10.2.0"
+  }
+}
