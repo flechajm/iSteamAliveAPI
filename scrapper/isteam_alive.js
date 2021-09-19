@@ -4,7 +4,7 @@ const status = require("./status");
 const steamStatusURL = "https://steamstat.us";
 
 /**
- * The core class to manager the scraping.
+ * The core class to manage the scraping.
  */
 class ISteamAlive {
   constructor() {
