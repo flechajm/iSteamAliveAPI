@@ -1,3 +1,4 @@
+const config = require("../package.json");
 const puppeteer = require("puppeteer");
 const status = require("./status");
 const steamStatusURL = "https://steamstat.us";
@@ -13,7 +14,9 @@ class ISteamAlive {
 
   getHome = async (_req, res) => {
     res.send(
-      "<pre>Visit <b>ISteamAlive API</b> on <a href='https://github.com/flechajm/ISteamAliveAPI'>GitHub</a>.</pre>"
+      "<pre>Visit <b>ISteamAlive API</b> (v" +
+        config.version +
+        ") on <a href='https://github.com/flechajm/ISteamAliveAPI'>GitHub</a>.</pre>"
     );
   };
 

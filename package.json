@@ -1,6 +1,6 @@
 {
   "name": "isteamaliveapi",
-  "version": "1.0.0",
+  "version": "1.0",
   "description": "\"Is Steam Alive API\" checks the current status of the Steam Services by scraping https://steamstat.us",
   "main": "app.js",
   "gitRepo": "https://github.com/flechajm/ISteamAliveAPI",
