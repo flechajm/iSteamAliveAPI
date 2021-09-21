@@ -1,8 +1,19 @@
+require("dotenv").config();
 const express = require("express");
 const router = express.Router();
-const ISteamAlive = new (require("../scrapper/isteam_alive"))();
+const nodeCache = require("node-cache");
+const cacheTTLSecs = process.env.CACHE_SECS;
+const cacheCheckPeriod = process.env.CHECK_PERIOD;
 
-router.get("/", ISteamAlive.getHome);
-router.get("/api/status", ISteamAlive.getStatus);
+const cacheSecs = !isNaN(cacheTTLSecs) && cacheTTLSecs > 0 ? cacheTTLSecs : 0;
+const cache = new nodeCache({
+  stdTTL: cacheSecs,
+  checkperiod: cacheCheckPeriod,
+  useClones: false,
+});
+const iSteamAlive = new (require("../scrapper/isteam_alive"))(cache);
+
+router.get("/", iSteamAlive.getHome);
+router.get("/api/status", iSteamAlive.getStatus);
 
 module.exports = router;

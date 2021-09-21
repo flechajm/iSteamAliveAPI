@@ -6,17 +6,16 @@ const steamStatusURL = "https://steamstat.us";
 /**
  * The core class to manage the scraping.
  */
-class ISteamAlive {
-  constructor() {
-    this.browser = null;
-    this.page = null;
+class iSteamAlive {
+  constructor(cache) {
+    this.cache = cache;
   }
 
   getHome = async (_req, res) => {
     res.send(
-      "<pre>Visit <b>ISteamAlive API</b> (v" +
+      "<pre>Visit <b>iSteamAlive API</b> (v" +
         config.version +
-        ") on <a href='https://github.com/flechajm/ISteamAliveAPI'>GitHub</a>.</pre>"
+        ") on <a href='https://github.com/flechajm/iSteamAliveAPI'>GitHub</a>.</pre>"
     );
   };
 
@@ -26,17 +25,25 @@ class ISteamAlive {
    * @param {*} res Response.
    */
   getStatus = async (_req, res) => {
-    try {
-      if (this.browser == null && this.page == null) {
-        this.browser = await this.#getBrowser();
-        this.page = await this.#goToSteamStatus();
-      }
+    let browser;
 
-      const result = await this.#getJSON();
-      res.send(result);
+    try {
+      const cacheValue = this.cache.get(steamStatusURL);
+
+      if (cacheValue !== undefined) {
+        res.send(cacheValue);
+      } else {
+        browser = await this.#getBrowser();
+        const page = await this.#goToSteamStatus(browser);
+        const jsonParsed = await this.#getJSON(page);
+
+        this.cache.set(steamStatusURL, jsonParsed);
+        res.send(jsonParsed);
+      }
     } catch (e) {
-      await this.browser.close();
       res.sendStatus(500);
+    } finally {
+      if (browser) await browser.close();
     }
   };
 
@@ -44,13 +51,34 @@ class ISteamAlive {
    * Gets the JSON mapped after scraping the web.
    * @returns JSON String.
    */
-  async #getJSON() {
-    const json = await this.page
-      .evaluate(() => {
-        return Array.from(document.querySelectorAll(".service")).map(
-          (el) => el.textContent
-        );
-      })
+  async #getJSON(page) {
+    const json = await page
+      .evaluate((selector) => {
+        const servicesData = [];
+        const elements = document.querySelectorAll(selector);
+
+        let name;
+        let status;
+        let alert;
+
+        for (let i = 0; i < elements.length; i++) {
+          const serviceDOM = elements[i];
+          if (serviceDOM.textContent != "") {
+            if (i % 2 == 0) {
+              name = serviceDOM.textContent.trim();
+            } else {
+              status = serviceDOM.textContent.trim();
+              alert = serviceDOM.className.split(" ")[1];
+
+              if (alert != null) {
+                servicesData.push(new Array(name, status, alert));
+              }
+            }
+          }
+        }
+
+        return servicesData;
+      }, ".service > span")
       .then((services) => {
         const mappedServices = this.#mapServices(services);
         return JSON.stringify(mappedServices);
@@ -63,8 +91,8 @@ class ISteamAlive {
    * Instantiates a new Page and navigate to the Steam Status URL, then returns it.
    * @returns An instance of Page.
    */
-  async #goToSteamStatus() {
-    const page = await this.browser.newPage();
+  async #goToSteamStatus(browser) {
+    const page = await browser.newPage();
     await page.setUserAgent("Chrome/93.0.4577.0");
     await page.goto(steamStatusURL, {
       waitUntil: "domcontentloaded",
@@ -92,59 +120,55 @@ class ISteamAlive {
    */
   #mapServices(services) {
     for (let i = 0; i < services.length; i++) {
-      const service = String(services[i]);
-      const serviceSplit = service
-        .split("\n")
-        .filter((s) => s)
-        .map((s) => s.trim());
+      const service = services[i];
 
-      if (serviceSplit.length == 2) {
-        switch (i) {
-          case 0:
-            status.steam_platform.online = serviceSplit[1];
-            break;
-          case 1:
-            status.steam_platform.ingame = serviceSplit[1];
-            break;
-          case 2:
-            status.steam_platform.store = serviceSplit[1];
-            break;
-          case 3:
-            status.steam_platform.community = serviceSplit[1];
-            break;
-          case 4:
-            status.steam_platform.webapi = serviceSplit[1];
-            break;
-          case 5:
-            status.steam_platform.connection_managers = serviceSplit[1];
-            break;
-          case 7:
-            status.game_coordinators.team_fortress2 = serviceSplit[1];
-            break;
-          case 8:
-            status.game_coordinators.dota2 = serviceSplit[1];
-            break;
-          case 9:
-            status.game_coordinators.underlords = serviceSplit[1];
-            break;
-          case 10:
-            status.game_coordinators.artifact = serviceSplit[1];
-            break;
-          case 11:
-            status.game_coordinators.csgo = serviceSplit[1];
-            break;
-          case 12:
-            status.csgo_services.sessions_logon = serviceSplit[1];
-            break;
-          case 13:
-            status.csgo_services.player_inventories = serviceSplit[1];
-            break;
-          case 14:
-            status.csgo_services.matchmaking_scheduler = serviceSplit[1];
-            break;
-          default:
-            break;
-        }
+      let data = { name: service[0], status: service[1], alert: service[2] };
+
+      switch (i) {
+        case 0:
+          status.steam_platform.online = data;
+          break;
+        case 1:
+          status.steam_platform.ingame = data;
+          break;
+        case 2:
+          status.steam_platform.store = data;
+          break;
+        case 3:
+          status.steam_platform.community = data;
+          break;
+        case 4:
+          status.steam_platform.webapi = data;
+          break;
+        case 5:
+          status.steam_platform.connection_managers = data;
+          break;
+        case 6:
+          status.game_coordinators.team_fortress2 = data;
+          break;
+        case 7:
+          status.game_coordinators.dota2 = data;
+          break;
+        case 8:
+          status.game_coordinators.underlords = data;
+          break;
+        case 9:
+          status.game_coordinators.artifact = data;
+          break;
+        case 10:
+          status.game_coordinators.csgo = data;
+          break;
+        case 11:
+          status.csgo_services.sessions_logon = data;
+          break;
+        case 12:
+          status.csgo_services.player_inventories = data;
+          break;
+        case 13:
+          status.csgo_services.matchmaking_scheduler = data;
+          break;
+        default:
+          break;
       }
     }
 
@@ -152,4 +176,4 @@ class ISteamAlive {
   }
 }
 
-module.exports = ISteamAlive;
+module.exports = iSteamAlive;
