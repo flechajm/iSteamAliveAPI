@@ -150,21 +150,15 @@ class iSteamAlive {
           status.game_coordinators.dota2 = data;
           break;
         case 8:
-          status.game_coordinators.underlords = data;
-          break;
-        case 9:
-          status.game_coordinators.artifact = data;
-          break;
-        case 10:
           status.game_coordinators.csgo = data;
           break;
-        case 11:
+        case 9:
           status.csgo_services.sessions_logon = data;
           break;
-        case 12:
+        case 10:
           status.csgo_services.player_inventories = data;
           break;
-        case 13:
+        case 11:
           status.csgo_services.matchmaking_scheduler = data;
           break;
         default:

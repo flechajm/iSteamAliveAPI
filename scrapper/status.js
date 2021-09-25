@@ -10,8 +10,6 @@ const status = {
   game_coordinators: {
     team_fortress2: "",
     dota2: "",
-    artifact: "",
-    underlords: "",
     csgo: "",
   },
   csgo_services: {
