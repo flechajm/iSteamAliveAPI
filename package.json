@@ -6,7 +6,7 @@
   "gitRepo": "https://github.com/flechajm/iSteamAliveAPI",
   "author": "Juan Manuel Flecha",
   "license": "MIT",
-  "requiresApiKey": true,
+  "requiresApiKey": false,
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app.js"
